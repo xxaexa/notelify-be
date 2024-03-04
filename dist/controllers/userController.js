@@ -14,15 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deletedUser = exports.updateUser = exports.getUser = void 0;
 const User_1 = __importDefault(require("../models/User"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 // Read
 const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Requested user ID:", req.params.id);
     try {
         const userDoc = yield User_1.default.findById(req.params.id).lean();
-        // if (!userDoc) {
-        //   return res.status(404).send("User not found");
-        // }
-        // const user = userDoc as unknown as UserPayload;
         res.status(200).send(userDoc);
     }
     catch (error) {
@@ -33,13 +29,28 @@ exports.getUser = getUser;
 // Update
 const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const updatedUser = yield User_1.default.findByIdAndUpdate(req.params.id, req.body, {
+        const { email, username, password } = req.body;
+        if (!email || !username || !password) {
+            return res
+                .status(400)
+                .send("All fields (email, username, password) are required.");
+        }
+        const salt = yield bcrypt_1.default.genSalt();
+        const hashedPassword = yield bcrypt_1.default.hash(password, salt);
+        const updatedUser = yield User_1.default.findByIdAndUpdate(req.params.id, {
+            email,
+            username,
+            password: hashedPassword,
+        }, {
             new: true,
-        });
+        }).select("-password");
+        if (!updatedUser) {
+            return res.status(404).send("User not found.");
+        }
         res.status(200).send(updatedUser);
     }
     catch (error) {
-        res.status(404).send(error);
+        res.status(500).send(error);
     }
 });
 exports.updateUser = updateUser;

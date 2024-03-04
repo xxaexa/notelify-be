@@ -1,16 +1,11 @@
 import { Request, Response } from "express";
 import User from "../models/User";
-import { UserPayload } from "../types";
+import bcrypt from "bcrypt";
 
 // Read
 export const getUser = async (req: Request, res: Response) => {
-  console.log("Requested user ID:", req.params.id);
   try {
     const userDoc = await User.findById(req.params.id).lean();
-    // if (!userDoc) {
-    //   return res.status(404).send("User not found");
-    // }
-    // const user = userDoc as unknown as UserPayload;
     res.status(200).send(userDoc);
   } catch (error) {
     res.status(500).send(error);
@@ -20,12 +15,35 @@ export const getUser = async (req: Request, res: Response) => {
 // Update
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const { email, username, password } = req.body;
+    if (!email || !username || !password) {
+      return res
+        .status(400)
+        .send("All fields (email, username, password) are required.");
+    }
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        email,
+        username,
+        password: hashedPassword,
+      },
+      {
+        new: true,
+      }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).send("User not found.");
+    }
+
     res.status(200).send(updatedUser);
   } catch (error) {
-    res.status(404).send(error);
+    res.status(500).send(error);
   }
 };
 

@@ -35,7 +35,6 @@ const getNotes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
     try {
         const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
-        console.log(userId);
         const notes = yield Note_1.Note.find({ user_id: userId });
         res.status(200).send(notes);
     }

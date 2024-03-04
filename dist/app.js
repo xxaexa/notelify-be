@@ -15,10 +15,6 @@ app.use(express_1.default.json());
 app.get("/", (req, res) => {
     res.send({ message: "Server Connected" });
 });
-app.get("/test", (req, res) => {
-    console.log("Test route accessed");
-    res.send("Test successful");
-});
 app.use("/api/auth", authRoute_1.default);
 app.use("/api/notes", noteRoute_1.default);
 app.use("/api/users", userRoute_1.default);

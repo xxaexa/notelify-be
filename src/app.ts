@@ -13,10 +13,6 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send({ message: "Server Connected" });
 });
-app.get("/test", (req, res) => {
-  console.log("Test route accessed");
-  res.send("Test successful");
-});
 
 app.use("/api/auth", authRoute);
 app.use("/api/notes", noteRoute);

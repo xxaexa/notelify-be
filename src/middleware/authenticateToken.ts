@@ -29,7 +29,6 @@ export const authenticateToken = (
           return res.status(403).json("Token is not valid!");
         }
         req.user = decoded as UserPayload;
-        console.log(decoded);
         next();
       }
     );

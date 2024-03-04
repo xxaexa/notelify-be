@@ -24,7 +24,6 @@ export const createNote = async (req: Request, res: Response) => {
 export const getNotes = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    console.log(userId);
     const notes = await Note.find({ user_id: userId });
     res.status(200).send(notes);
   } catch (error) {
